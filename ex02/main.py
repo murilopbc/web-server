@@ -5,7 +5,7 @@ import socketserver
 class MyHandler(SimpleHTTPRequestHandler):
     def list_directory(self, path):
         try:
-            f = open(os.path.join(path, 'index.html'), 'r')
+            f = open(os.path.join(path, 'home.html'), 'r')
             self.send_response(200)
             self.send_header('Content-type', "text/html")
             self.end_headers()
