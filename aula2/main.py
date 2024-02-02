@@ -2,6 +2,7 @@ import os
 from http.server import SimpleHTTPRequestHandler
 import socketserver
 
+
 class MyHandler(SimpleHTTPRequestHandler):
     def list_directory(self, path):
         try:
@@ -16,6 +17,20 @@ class MyHandler(SimpleHTTPRequestHandler):
             pass
 
         return super().list_directory(path)
+    
+    def do_GET(self):
+        if self.path == '/login':
+            try:
+                with open(os.path.join(os.getcwd(), '/aula1/ex02/login.html'), 'r') as login_file:
+                    content = login_file.read()
+                self.send_response(200)
+                self.send_header('Content-type', "text/html")
+                self.end_headers()
+                self.wfile.write(content.encode('utf-8'))
+            except FileNotFoundError:
+                self.send_error(404, "File not found")
+        else:
+            super().do_GET()
     
 endereco_ip = '0.0.0.0'
 porta = 8000
