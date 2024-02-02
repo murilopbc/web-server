@@ -11,9 +11,9 @@
 <body>
     <div class="login-container">
         <h2>Login</h2>
-        <form action="#">
-            <input type="text" placeholder="Nome de usuário" required>
-            <input type="password" placeholder="Senha" required>
+        <form action="/enviar_login" method="post">
+            <input id="email" name="email" type="text" placeholder="Nome de usuário" required>
+            <input id="senha" name="senha" type="password" placeholder="Senha" required>
             <button type="submit">Entrar</button>
         </form>
     </div>
