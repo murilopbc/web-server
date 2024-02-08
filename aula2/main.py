@@ -62,11 +62,13 @@ class MyHandler(SimpleHTTPRequestHandler):
             
             login = form_data.get('email', ['']) [0]
             if self.usuario_existente(login):
+                with open(os.path.join(os.getcwd(), 'usuario_existe.html'), 'r') as usuario_existe_file:
+                    content = usuario_existe_file.read()
                 self.send_response(200)
-                self.send_header("Content-type", "text/html; charset=utf-8")
+                self.send_header("Content-type", "text/html")
                 self.end_headers()
-                mensagem = f"Usuário {login} já consta em nossos registros!"
-                self.wfile.write(mensagem.encode('utf-8'))
+                self.wfile.write(content.encode('utf-8'))
+                
             else:
 
 # Dados login gravados em um arquivo txt 
