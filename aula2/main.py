@@ -36,6 +36,16 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+# Função para verificar se o usuario já existe
+              
+    def usuario_existente(self, login):
+        with open("dados_login.txt", "r") as file:
+            for line in file:
+                stored_login, _ = line.strip().split(';')
+                if login == stored_login:
+                    return True
+        return False
+
 # Método POST envia os dados do login para a página resposta.html através de uma rota /enviar_login
             
     def do_POST(self):
@@ -48,21 +58,32 @@ class MyHandler(SimpleHTTPRequestHandler):
             print("Email: ", form_data.get('email', ['']) [0])
             print("Senha ", form_data.get('senha', ['']) [0])
 
+# Confere se o usuario com o campo 'email' já existe
+            
+            login = form_data.get('email', ['']) [0]
+            if self.usuario_existente(login):
+                self.send_response(200)
+                self.send_header("Content-type", "text/html; charset=utf-8")
+                self.end_headers()
+                mensagem = f"Usuário {login} já consta em nossos registros!"
+                self.wfile.write(mensagem.encode('utf-8'))
+            else:
+
 # Dados login gravados em um arquivo txt 
             
-            with open('dados_login.txt', 'a') as file:
-                login = form_data.get('email', ['']) [0]
-                senha = form_data.get('senha',[''])[0]
-                file.write(f"{login};{senha}\n")
+                with open('dados_login.txt', 'a') as file:
+                    login = form_data.get('email', ['']) [0]
+                    senha = form_data.get('senha',[''])[0]
+                    file.write(f"{login};{senha}\n")
 
 # Página html que será carregada após o usuário enviar o login
                 
-            with open(os.path.join(os.getcwd(), 'resposta.html'), 'r') as resposta_file:
-                content = resposta_file.read()
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(content.encode('utf-8'))
+                with open(os.path.join(os.getcwd(), 'resposta.html'), 'r') as resposta_file:
+                    content = resposta_file.read()
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(content.encode('utf-8'))
         else:
             super(MyHandler, self).do_POST()    
     
