@@ -3,6 +3,7 @@ from http.server import SimpleHTTPRequestHandler
 import socketserver
 from urllib.parse import parse_qs
 
+# abre o arquivo index.html
 
 class MyHandler(SimpleHTTPRequestHandler):
     def list_directory(self, path):
@@ -18,6 +19,8 @@ class MyHandler(SimpleHTTPRequestHandler):
             pass
 
         return super().list_directory(path)
+
+# Método GET acessa o arquivo login.html por uma rota /login
     
     def do_GET(self):
         if self.path == '/login':
@@ -33,6 +36,8 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+# Método POST envia os dados do login para a página resposta.html através de uma rota /enviar_login
+            
     def do_POST(self):
         if self.path == '/enviar_login':
             content_length = int(self.headers['Content-Length'])
@@ -43,15 +48,21 @@ class MyHandler(SimpleHTTPRequestHandler):
             print("Email: ", form_data.get('email', ['']) [0])
             print("Senha ", form_data.get('senha', ['']) [0])
 
+# Dados login gravados em um arquivo txt 
+            
             with open('dados_login.txt', 'a') as file:
                 login = form_data.get('email', ['']) [0]
                 senha = form_data.get('senha',[''])[0]
                 file.write(f"{login};{senha}\n")
 
+# Página html que será carregada após o usuário enviar o login
+                
+            with open(os.path.join(os.getcwd(), 'resposta.html'), 'r') as resposta_file:
+                content = resposta_file.read()
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            self.wfile.write("Dados recebidos com sucesso!".encode('utf-8'))
+            self.wfile.write(content.encode('utf-8'))
         else:
             super(MyHandler, self).do_POST()    
     
