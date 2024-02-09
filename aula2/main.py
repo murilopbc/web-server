@@ -36,14 +36,15 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
-# Função para verificar se o usuario já existe
+# Função para verificar se o login e senha já existe
               
-    def usuario_existente(self, login):
+    def usuario_existente(self, login, senha):
         with open("dados_login.txt", "r") as file:
             for line in file:
-                stored_login, _ = line.strip().split(';')
+                stored_login, stored_senha = line.strip().split(';')
                 if login == stored_login:
-                    return True
+                    print("Senha"+ senha)
+                    return senha == stored_senha
         return False
 
 # Método POST envia os dados do login para a página resposta.html através de uma rota /enviar_login
