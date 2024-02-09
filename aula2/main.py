@@ -13,7 +13,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
             self.wfile.write(f.read().encode('utf-8'))
-            f.close
+            f.close()
             return None
         except FileNotFoundError:
             pass
