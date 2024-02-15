@@ -39,6 +39,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
+
             with open(os.path.join(os.getcwd(), 'login.html'), 'r', encoding='utf-8') as login_file:
                 content = login_file.read()
             mensagem = "Login e/ou senha incorreta. Tente novamente"
@@ -53,7 +54,6 @@ class MyHandler(SimpleHTTPRequestHandler):
 
             login = query_params.get('email', [''])[0]
             senha = query_params.get('senha', [''])[0]
-
 
             welcome_message = f"Olá {login}, seja bem-vindo.Complete seu cadastro"
 
@@ -78,16 +78,16 @@ class MyHandler(SimpleHTTPRequestHandler):
 # Função para verificar se o login e senha já existe
               
     def usuario_existente(self, login, senha):
-        with open("dados.login.txt", "r") as file:
+        with open("dados.login.txt", "r", encoding='utf-8') as file:
             for line in file:
-                stored_login, stored_senha, stored_nome = line.strip().split(';')
-                if login == stored_login:
-                    print("Senha: "+ senha)
-                    return senha == stored_senha
+                if line.strip():
+                    stored_login, stored_senha, stored_nome = line.strip().split(';')
+                    if login == stored_login:
+                        print("Senha: "+ senha)
+                        return senha == stored_senha
         return False
     
     def remover_ultima_linha(self, arquivo):
-        print("Vou excluir a ultima linha")
         with open(arquivo, 'r', encoding='utf-8') as file:
             lines = file.readlines()
         with open(arquivo, 'w', encoding='utf-8') as file:
@@ -142,7 +142,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             body = self.rfile.read(content_length).decode('utf-8')
             form_data = parse_qs(body, keep_blank_values=True)
 
-            login = form_data.get('login', [''])[0]
+            login = form_data.get('email', [''])[0]
             senha = form_data.get('senha', [''])[0]
             nome = form_data.get('nome', [''])[0]
 
