@@ -1,7 +1,7 @@
 import os
 from http.server import SimpleHTTPRequestHandler
 import socketserver
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlparse
 
 # abre o arquivo index.html
 
@@ -46,7 +46,32 @@ class MyHandler(SimpleHTTPRequestHandler):
             content = content.replace('<!-- ERRO -->',
                                        f'<div class="error-message"><p>{mensagem}</p></div>')
             self.wfile.write(content.encode('utf-8'))
+        
+        elif self.path.startswith('/cadastro'):
 
+            query_params = parse_qs(urlparse(self.path).query)
+
+            login = query_params.get('email', [''])[0]
+            senha = query_params.get('senha', [''])[0]
+
+
+            welcome_message = f"Olá {login}, seja bem-vindo.Complete seu cadastro"
+
+            self.send_response(200)
+            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.end_headers()
+
+            with open(os.path.join(os.getcwd(), 'cadastro.html'), 'r', encoding='utf-8') as cadastro_file:
+                content = cadastro_file.read()
+
+            content = content.replace('{login}', login)
+            content = content.replace('{senha}', senha)
+            content = content.replace('{welcome_message}', welcome_message)
+
+            self.wfile.write(content.encode('utf-8'))
+
+            return
+            
         else:
             super().do_GET()
 
@@ -92,6 +117,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.send_header('Location', '/login_failed')
                     self.end_headers()
                     return
+                
                 else:
 
 # Dados login gravados em um arquivo txt 
@@ -101,14 +127,18 @@ class MyHandler(SimpleHTTPRequestHandler):
                         senha = form_data.get('senha',[''])[0]
                         file.write(f"{login};{senha}\n")
 
+                    self.send_response(302)
+                    self.send_header("Location", f"/cadastro?email={login}&senha={senha}")
+                    self.end_headers()
+                    # self.wfile.write(content.encode('utf-8'))
+
+                    return
+
 # Página html que será carregada após o usuário enviar o login
                     
-                    with open(os.path.join(os.getcwd(), 'resposta.html'), 'r') as resposta_file:
-                        content = resposta_file.read()
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html; charset=utf-8")
-                    self.end_headers()
-                    self.wfile.write(content.encode('utf-8'))
+                    # with open(os.path.join(os.getcwd(), 'resposta.html'), 'r') as resposta_file:
+                    #     content = resposta_file.read()
+
         else:
             super(MyHandler, self).do_POST()    
     
