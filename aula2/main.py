@@ -4,9 +4,12 @@ import socketserver
 from urllib.parse import parse_qs, urlparse
 import hashlib
  
+
 class MyMandler(SimpleHTTPRequestHandler):
     def list_directory(self, path):
+        # Tenta o Código abaixo
         try:
+
             f = open(os.path.join(path, 'index.html'), 'r')
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -14,12 +17,15 @@ class MyMandler(SimpleHTTPRequestHandler):
             self.wfile.write(f.read().encode('utf-8'))
             f.close
             return None
+
         except FileNotFoundError:
             pass
+ 
         return super().list_directory(path)
-    
+   
     def do_GET(self):
         if self.path =='/login':
+
             try:
                 with open(os.path.join(os.getcwd(), 'login.html'), 'r') as login_file:
                     content = login_file.read()
@@ -27,34 +33,40 @@ class MyMandler(SimpleHTTPRequestHandler):
                 self.send_header("content-type","text/html")
                 self.end_headers()
                 self.wfile.write(content.encode('utf-8'))          
+
             except FileNotFoundError:
                 pass
-
+           
         elif self.path == '/login_failed':
+
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
+           
 
             with open(os.path.join(os.getcwd(), 'login.html'), 'r', encoding='utf-8') as login_file:
                 content = login_file.read()
+               
+
             mensagem = "Login e/ou senha incorreta. Tente novamente"
             content = content.replace('<!-- Mensagem de erro será inserida aqui -->',
                                       f'<div class="error-message">{mensagem}</div>')
            
+     
             self.wfile.write(content.encode('utf-8'))  
        
         elif self.path.startswith('/novo_cadastro'):
  
- 
+
             query_params = parse_qs(urlparse(self.path).query)
             login = query_params.get('login',[''])[0]
             senha = query_params.get('senha',[''])[0]
  
- 
+
  
             welcome_message = f"Olá {login}, seja bem-vindo! Percebemos que você é novo por aqui.Complete seu cadastro"
  
- 
+
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
@@ -72,21 +84,10 @@ class MyMandler(SimpleHTTPRequestHandler):
  
             self.wfile.write(content.encode('utf-8'))
  
-            return
-        
-        elif self.path.startswith('/cadastrado'):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html; charset=utf-8")
-            self.end_headers()
-
-            with open(os.path.join(os.getcwd(), 'cadastrado.html'), 'r', encoding="utf-8") as file:
-                content = file.read()
-
-            self.wfile.write(content.encode('utf-8'))
+            return 
        
-            return
         else:
- 
+
             super().do_GET()
  
     def usuario_existente(self, login, senha):
@@ -118,14 +119,14 @@ class MyMandler(SimpleHTTPRequestHandler):
                 file.writelines(lines[:-1])
  
     def do_POST(self):
- 
+
         if self.path == '/enviar_login':
  
             content_length = int(self.headers['content-Length'])
- 
+
             body = self.rfile.read(content_length).decode('utf-8')
-         
-            form_data = parse_qs(body, keep_blank_values=True)
+          
+            form_data = parse_qs(body)
  
             print(form_data)
             print("DADOS DO FORMULÁRIO")
@@ -137,12 +138,14 @@ class MyMandler(SimpleHTTPRequestHandler):
             senha = form_data.get('senha', [''])[0]
            
             if self.usuario_existente(login, senha):
- 
-                self.send_response(302)
-                self.send_header("Location", "/cadastrado")
+                with open(os.path.join(os.getcwd(), 'cadastrado.html'), 'r', encoding='utf-8') as existe:
+                    content_file = existe.read()
+
+                self.send_response(200)
+                self.send_header("Content-type", "text/html; charset=utf-8")
                 self.end_headers()
-           
-                return
+            
+                self.wfile.write(content_file.encode('utf-8'))
            
             else:
                 if any(line.startswith(f"{login};") for line in open("dados.login.txt", "r", encoding="UTF-8")):
@@ -152,14 +155,14 @@ class MyMandler(SimpleHTTPRequestHandler):
                     return # adicionando um return para evitar a execução
                
                 else:
- 
+
                         self.adicionar_usuario(login,senha, nome='None')
                         self.send_response(302)
                         self.send_header('Location', f'novo_cadastro?login={login}&senha={senha}')
                         self.end_headers()
+
  
- 
-                        return # adicionando um return para evitar a execução
+                return # adicionando um return para evitar a execução
  
         elif   self.path.startswith('/confirmar_cadastro'):
             #obtem o comprimento do corpo da requisição
@@ -189,14 +192,14 @@ class MyMandler(SimpleHTTPRequestHandler):
                     for line in lines:
                         stored_login, stored_senha,stored_nome = line.strip().split(';')
                         if login == stored_login and senha_hash == stored_senha:
-                            line = f"{login};{senha_hash};{nome} \n"
+                            line = f"{login};{senha_hash};{nome}\n"
                         file.write(line)
  
                         #Redireciona o cliente para onde desejar apos a confirmação
                     self.send_response(302)
                     self.send_header("Content-type", "text/html; charset=utf-8")
                     self.end_headers()
-                    self.wfile.write("Registro recebido com sucesso!!!".encode('utf-8'))
+                    self.wfile.write("Registro recebido com sucesso!!!". encode('utf-8'))
  
             else:
                         #Se o usuario não existe ou senha incorreta, redireciona para outra pagina
@@ -209,11 +212,12 @@ class MyMandler(SimpleHTTPRequestHandler):
             super(MyMandler,self).do_POST()
  
  
- 
+
 endereco_ip = "0.0.0.0"
 porta = 8000
  
- 
+
 with socketserver.TCPServer((endereco_ip, porta), MyMandler) as httpd:
     print(f"Servidor iniciando em {endereco_ip}:{porta}")
     httpd.serve_forever()
+ 
